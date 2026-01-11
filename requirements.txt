@@ -1,0 +1,41 @@
+# Smart Institutional CRM - Backend Requirements
+# Python equivalent packages for reference (this is a Node.js project)
+
+# System Requirements
+# Node.js >= 14.0.0
+# MongoDB >= 4.4.0
+# npm >= 6.0.0
+
+# Backend Dependencies (package.json)
+express>=4.18.2
+mongoose>=6.8.4
+jsonwebtoken>=9.0.0
+bcryptjs>=2.4.3
+cors>=2.8.5
+dotenv>=16.0.3
+nodemon>=2.0.20
+
+# Development Dependencies
+eslint>=8.0.0
+prettier>=2.8.0
+
+# Optional Dependencies
+helmet>=6.0.0
+express-rate-limit>=6.6.0
+compression>=1.7.4
+
+# Database
+# MongoDB Community Server 4.4+
+# MongoDB Compass (GUI - Optional)
+
+# Environment Variables Required
+# PORT=5001
+# MONGODB_URI=mongodb://localhost:27017/smart_crm
+# JWT_SECRET=your-super-secret-jwt-key-here-change-in-production
+# NODE_ENV=development
+
+# Minimum System Requirements
+# RAM: 4GB minimum, 8GB recommended
+# Storage: 2GB free space minimum
+# OS: Windows 10/11, macOS 10.15+, Ubuntu 18.04+
+# Internet: Required for Gemini API integration
