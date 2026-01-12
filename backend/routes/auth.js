@@ -77,6 +77,24 @@ router.post('/login', async (req, res) => {
             }, process.env.JWT_SECRET || 'fallback-secret');
             
             console.log(`${user.role} login successful for:`, username);
+            
+            // Log login activity for teachers/students
+            try {
+              const tenantConnection = DatabaseManager.getTenantConnection(adminRecord.databaseName);
+              const ActivityLogModel = tenantConnection.model('ActivityLog', require('../models/ActivityLog').schema);
+              
+              await ActivityLogModel.create({
+                userId: user._id,
+                action: 'LOGIN',
+                targetType: 'AUTH',
+                details: { loginTime: new Date(), role: user.role },
+                ipAddress: req.ip,
+                userAgent: req.get('User-Agent')
+              });
+            } catch (logError) {
+              console.log('Activity logging failed (non-critical):', logError.message);
+            }
+            
             return res.json({
               token,
               user: {
@@ -115,6 +133,23 @@ router.post('/login', async (req, res) => {
 
 // Get current user
 router.get('/me', tenantAuth, async (req, res) => {
+  try {
+    if (req.tenantModels && req.tenantModels.ActivityLog) {
+      await req.tenantModels.ActivityLog.create({
+        userId: req.user._id,
+        action: 'VIEW_PROFILE',
+        targetType: 'USER',
+        targetId: req.user._id,
+        targetName: req.user.username,
+        details: { role: req.user.role },
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+    }
+  } catch (logError) {
+    console.log('Activity logging failed (non-critical):', logError.message);
+  }
+  
   res.json({
     id: req.user._id,
     username: req.user.username,

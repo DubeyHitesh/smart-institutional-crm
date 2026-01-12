@@ -1,0 +1,76 @@
+[{
+  "_id": {
+    "$oid": "69563d25672c6ef22481807a"
+  },
+  "name": "A",
+  "grade": "9th",
+  "studentIds": [
+    {
+      "$oid": "69539ca0885d0a21dd14bee0"
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-01-01T09:23:49.764Z"
+  },
+  "updatedAt": {
+    "$date": "2026-01-01T10:25:39.423Z"
+  },
+  "__v": 0,
+  "teacherId": {
+    "$oid": "69539c18885d0a21dd14bed6"
+  }
+},
+{
+  "_id": {
+    "$oid": "69563e0f672c6ef2248180c0"
+  },
+  "name": "A",
+  "grade": "10th",
+  "studentIds": [],
+  "createdAt": {
+    "$date": "2026-01-01T09:27:43.729Z"
+  },
+  "updatedAt": {
+    "$date": "2026-01-01T10:22:24.294Z"
+  },
+  "__v": 0,
+  "teacherId": null
+},
+{
+  "_id": {
+    "$oid": "6956473d829ccfd14807f35b"
+  },
+  "name": "B",
+  "grade": "9th",
+  "teacherId": {
+    "$oid": "69539c80885d0a21dd14bedc"
+  },
+  "studentIds": [
+    {
+      "$oid": "695638e8dd2458d9c638cf64"
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-01-01T10:06:53.551Z"
+  },
+  "updatedAt": {
+    "$date": "2026-01-01T10:25:39.405Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69564b950eac0470d0e3b67e"
+  },
+  "name": "B",
+  "grade": "10th",
+  "teacherId": null,
+  "studentIds": [],
+  "createdAt": {
+    "$date": "2026-01-01T10:25:25.445Z"
+  },
+  "updatedAt": {
+    "$date": "2026-01-01T10:25:25.445Z"
+  },
+  "__v": 0
+}]

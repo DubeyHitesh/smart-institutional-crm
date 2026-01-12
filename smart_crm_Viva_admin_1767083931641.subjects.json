@@ -1,0 +1,34 @@
+[{
+  "_id": {
+    "$oid": "696408cd69cb8eb67aa27c25"
+  },
+  "name": "Software engineering",
+  "description": "",
+  "assignedTeacher": {
+    "$oid": "69539c80885d0a21dd14bedc"
+  },
+  "createdBy": {
+    "$oid": "69538f9b73f6be27fd1bbc42"
+  },
+  "createdAt": {
+    "$date": "2026-01-11T20:32:13.116Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6964090469cb8eb67aa27c34"
+  },
+  "name": "Operating System",
+  "description": "",
+  "assignedTeacher": {
+    "$oid": "69539c18885d0a21dd14bed6"
+  },
+  "createdBy": {
+    "$oid": "69538f9b73f6be27fd1bbc42"
+  },
+  "createdAt": {
+    "$date": "2026-01-11T20:33:08.688Z"
+  },
+  "__v": 0
+}]

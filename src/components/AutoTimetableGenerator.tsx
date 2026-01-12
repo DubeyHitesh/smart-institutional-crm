@@ -113,11 +113,6 @@ const TimeSlots = [
 
 const Days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-const Subjects = [
-  'Mathematics', 'English', 'Science', 'History', 'Geography',
-  'Physics', 'Chemistry', 'Biology', 'Computer Science', 'Art'
-];
-
 export default function AutoTimetableGenerator() {
   const { state, dispatch } = useApp();
   const [generating, setGenerating] = useState(false);
@@ -269,15 +264,8 @@ export default function AutoTimetableGenerator() {
   };
 
   const getClassSubjects = (grade: string) => {
-    // Return subjects based on grade level
-    const gradeNum = parseInt(grade);
-    if (gradeNum <= 5) {
-      return ['Mathematics', 'English', 'Science', 'Art'];
-    } else if (gradeNum <= 8) {
-      return ['Mathematics', 'English', 'Science', 'History', 'Geography'];
-    } else {
-      return ['Mathematics', 'English', 'Physics', 'Chemistry', 'Biology', 'Computer Science'];
-    }
+    // Return placeholder when no subjects are created
+    return ['No subjects assigned'];
   };
 
   return (
@@ -346,9 +334,9 @@ export default function AutoTimetableGenerator() {
               value={config.maxPeriodsPerDay}
               onChange={(e) => setConfig({...config, maxPeriodsPerDay: parseInt(e.target.value)})}
             >
-              <option value={3}>3 Periods</option>
-              <option value={4}>4 Periods</option>
-              <option value={5}>5 Periods</option>
+              {[...Array(10)].map((_, i) => (
+                <option key={i + 1} value={i + 1}>{i + 1} Period{i + 1 > 1 ? 's' : ''}</option>
+              ))}
             </select>
           </ConfigItem>
           
@@ -358,10 +346,9 @@ export default function AutoTimetableGenerator() {
               value={config.maxPeriodsPerWeek}
               onChange={(e) => setConfig({...config, maxPeriodsPerWeek: parseInt(e.target.value)})}
             >
-              <option value={3}>3 Periods</option>
-              <option value={4}>4 Periods</option>
-              <option value={5}>5 Periods</option>
-              <option value={6}>6 Periods</option>
+              {[...Array(15)].map((_, i) => (
+                <option key={i + 1} value={i + 1}>{i + 1} Period{i + 1 > 1 ? 's' : ''}</option>
+              ))}
             </select>
           </ConfigItem>
         </ConfigSection>

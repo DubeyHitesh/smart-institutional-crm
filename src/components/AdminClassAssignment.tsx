@@ -199,8 +199,8 @@ const ButtonGroup = styled.div`
   margin-top: 20px;
 `;
 
-const Button = styled.button<{ variant?: 'primary' | 'secondary' }>`
-  background: ${props => props.variant === 'secondary' ? '#6c757d' : '#667eea'};
+const Button = styled.button<{ $variant?: 'primary' | 'secondary' }>`
+  background: ${props => props.$variant === 'secondary' ? '#6c757d' : '#667eea'};
   color: white;
   border: none;
   padding: 10px 20px;
@@ -618,7 +618,7 @@ export default function AdminClassAssignment() {
                 ))}
               </Select>
               <ButtonGroup>
-                <Button type="button" variant="secondary" onClick={() => {
+                <Button type="button" $variant="secondary" onClick={() => {
                   setShowClassModal(false);
                   setEditingClass(null);
                   setClassForm({ name: '', grade: '', teacherId: '' });
@@ -719,7 +719,7 @@ export default function AdminClassAssignment() {
                 ))}
               </Select>
               <ButtonGroup>
-                <Button type="button" variant="secondary" onClick={() => setShowScheduleModal(false)}>
+                <Button type="button" $variant="secondary" onClick={() => setShowScheduleModal(false)}>
                   Cancel
                 </Button>
                 <Button type="submit">Add Schedule</Button>

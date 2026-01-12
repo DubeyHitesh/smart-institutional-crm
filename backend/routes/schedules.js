@@ -4,7 +4,7 @@ const ScheduleLog = require('../models/ScheduleLog');
 const Class = require('../models/Class');
 const User = require('../models/User');
 const { tenantAuth, adminAuth } = require('../middleware/tenantAuth');
-const { logAdminActivity } = require('../middleware/activityLogger');
+const { logAdminActivity, logActivity } = require('../middleware/activityLogger');
 
 const router = express.Router();
 
@@ -62,6 +62,7 @@ router.get('/', tenantAuth, async (req, res) => {
     const schedules = await req.tenantModels.Schedule.find()
       .populate('classId', 'name grade')
       .populate('teacherId', 'name username');
+    await logActivity(req, 'VIEW_SCHEDULES', 'SCHEDULE', null, null, { count: schedules.length });
     res.json(schedules);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
@@ -173,6 +174,10 @@ router.post('/', tenantAuth, adminAuth, async (req, res) => {
       classId, teacherId, subject, day, startTime, endTime
     }, req);
     
+    await logActivity(req, 'CREATE_SCHEDULE', 'SCHEDULE', schedule._id, subject, {
+      classId, teacherId, day, startTime, endTime
+    });
+    
     res.status(201).json(schedule);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
@@ -235,6 +240,10 @@ router.put('/:id', tenantAuth, adminAuth, async (req, res) => {
         endTime: schedule.endTime,
         academicYear: schedule.academicYear
       }, schedule._id, previousData);
+      
+      await logAdminActivity(req.user._id, req.user.username, 'UPDATE_SCHEDULE', 'SCHEDULE', schedule._id, schedule.subject, req.body, req);
+      
+      await logActivity(req, 'UPDATE_SCHEDULE', 'SCHEDULE', schedule._id, schedule.subject, req.body);
 
       res.json(schedule);
     } else {
@@ -248,6 +257,10 @@ router.put('/:id', tenantAuth, adminAuth, async (req, res) => {
       if (!schedule) {
         return res.status(404).json({ message: 'Schedule not found' });
       }
+      
+      await logAdminActivity(req.user._id, req.user.username, 'UPDATE_SCHEDULE', 'SCHEDULE', schedule._id, schedule.subject, req.body, req);
+      
+      await logActivity(req, 'UPDATE_SCHEDULE', 'SCHEDULE', schedule._id, schedule.subject, req.body);
 
       res.json(schedule);
     }
@@ -261,21 +274,18 @@ router.delete('/', tenantAuth, adminAuth, async (req, res) => {
   try {
     const result = await req.tenantModels.Schedule.deleteMany({});
     
-    // Log deletion in ActivityLog
-    await req.tenantModels.ActivityLog.create({
-      userId: req.user._id,
-      action: 'DELETE_ALL_SCHEDULES',
-      targetType: 'schedule',
-      details: {
-        deletedCount: result.deletedCount
-      },
-      ipAddress: req.ip,
-      userAgent: req.get('User-Agent')
+    await logAdminActivity(req.user._id, req.user.username, 'DELETE_ALL_SCHEDULES', 'SCHEDULE', null, null, {
+      deletedCount: result.deletedCount
+    }, req);
+    
+    await logActivity(req, 'DELETE_ALL_SCHEDULES', 'SCHEDULE', null, null, {
+      deletedCount: result.deletedCount
     });
     
     res.json({ message: `${result.deletedCount} schedules deleted successfully`, deletedCount: result.deletedCount });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('Delete all schedules error:', error);
+    res.status(500).json({ message: 'Server error: ' + error.message });
   }
 });
 
@@ -303,20 +313,16 @@ router.delete('/:id', tenantAuth, adminAuth, async (req, res) => {
       academicYear: scheduleData.academicYear
     }, req.params.id, scheduleData);
     
-    // Log in ActivityLog for comprehensive tracking
-    await req.tenantModels.ActivityLog.create({
-      userId: req.user._id,
-      action: 'DELETE_SCHEDULE',
-      targetType: 'schedule',
-      targetId: req.params.id,
-      details: {
-        subject: scheduleData.subject,
-        day: scheduleData.day,
-        startTime: scheduleData.startTime,
-        endTime: scheduleData.endTime
-      },
-      ipAddress: req.ip,
-      userAgent: req.get('User-Agent')
+    await logAdminActivity(req.user._id, req.user.username, 'DELETE_SCHEDULE', 'SCHEDULE', req.params.id, scheduleData.subject, {
+      day: scheduleData.day,
+      startTime: scheduleData.startTime,
+      endTime: scheduleData.endTime
+    }, req);
+    
+    await logActivity(req, 'DELETE_SCHEDULE', 'SCHEDULE', req.params.id, scheduleData.subject, {
+      day: scheduleData.day,
+      startTime: scheduleData.startTime,
+      endTime: scheduleData.endTime
     });
     
     res.json({ message: 'Schedule deleted successfully' });

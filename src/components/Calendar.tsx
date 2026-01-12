@@ -84,8 +84,9 @@ const DayHeader = styled.div`
   font-size: 14px;
 `;
 
-const DayCell = styled.div<{ $isToday?: boolean; $isOtherMonth?: boolean; $hasHoliday?: boolean }>`
+const DayCell = styled.div<{ $isToday?: boolean; $isOtherMonth?: boolean; $hasHoliday?: boolean; $hasAdminEvent?: boolean }>`
   background: ${props => 
+    props.$hasAdminEvent ? 'rgba(239, 68, 68, 0.3)' :
     props.$hasHoliday ? 'rgba(34, 197, 94, 0.3)' :
     props.$isOtherMonth ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.1)'
   };
@@ -121,6 +122,21 @@ const Event = styled.div<{ $type: string }>`
   text-overflow: ellipsis;
   white-space: nowrap;
   line-height: 1.2;
+  cursor: pointer;
+  position: relative;
+  
+  &:hover {
+    opacity: 0.8;
+  }
+  
+  &:hover::after {
+    content: '×';
+    position: absolute;
+    right: 2px;
+    top: 0;
+    font-size: 10px;
+    font-weight: bold;
+  }
 `;
 
 const Modal = styled.div<{ $show: boolean }>`
@@ -175,6 +191,11 @@ const Select = styled.select`
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.1);
   color: white;
+  
+  option {
+    background: #1F2937;
+    color: white;
+  }
 `;
 
 const TextArea = styled.textarea`
@@ -225,6 +246,8 @@ export default function Calendar() {
   const [showYearDropdown, setShowYearDropdown] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -235,11 +258,14 @@ export default function Calendar() {
 
   useEffect(() => {
     const loadCalendar = async () => {
-      await initializeHolidays();
+      if (!nationalHolidaysLoaded) {
+        await initializeHolidays();
+        setNationalHolidaysLoaded(true);
+      }
       await fetchEvents();
     };
     loadCalendar();
-  }, [currentUser, currentDate]);
+  }, [currentUser, currentDate, nationalHolidaysLoaded]);
 
   const fetchEvents = async () => {
     try {
@@ -279,34 +305,93 @@ export default function Calendar() {
   const handleDateClick = (date: Date) => {
     if (currentUser?.role === 'admin') {
       setSelectedDate(date);
+      setSelectedEvent(null);
+      setIsEditing(false);
+      setFormData({ title: '', description: '', type: 'academic_event' });
+      setShowModal(true);
+    }
+  };
+
+  const handleEventClick = (event: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (currentUser?.role === 'admin' && event.type !== 'national_holiday') {
+      setSelectedEvent(event);
+      setIsEditing(true);
+      setFormData({
+        title: event.title,
+        description: event.description || '',
+        type: event.type
+      });
       setShowModal(true);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedDate) return;
-
+    
     try {
-      const response = await fetch('http://localhost:5001/api/calendar', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          ...formData,
-          date: selectedDate.toISOString()
-        })
-      });
+      if (isEditing && selectedEvent) {
+        // Update existing event
+        const response = await fetch(`http://localhost:5001/api/calendar/${selectedEvent._id}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+        
+        if (response.ok) {
+          setShowModal(false);
+          setIsEditing(false);
+          setSelectedEvent(null);
+          setFormData({ title: '', description: '', type: 'academic_event' });
+          fetchEvents();
+        }
+      } else {
+        // Create new event
+        if (!selectedDate) return;
+        
+        const response = await fetch('http://localhost:5001/api/calendar', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            ...formData,
+            date: selectedDate.toISOString()
+          })
+        });
 
+        if (response.ok) {
+          setShowModal(false);
+          setFormData({ title: '', description: '', type: 'academic_event' });
+          fetchEvents();
+        }
+      }
+    } catch (error) {
+      console.error('Error saving event:', error);
+    }
+  };
+
+  const handleDeleteEvent = async (eventId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (currentUser?.role !== 'admin') return;
+    
+    try {
+      const response = await fetch(`http://localhost:5001/api/calendar/${eventId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
       if (response.ok) {
-        setShowModal(false);
-        setFormData({ title: '', description: '', type: 'academic_event' });
         fetchEvents();
       }
     } catch (error) {
-      console.error('Error creating event:', error);
+      console.error('Error deleting event:', error);
     }
   };
 
@@ -314,7 +399,6 @@ export default function Calendar() {
     const year = date.getFullYear();
     const month = date.getMonth();
     const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
     const startDate = new Date(firstDay);
     startDate.setDate(startDate.getDate() - firstDay.getDay());
     
@@ -423,19 +507,25 @@ export default function Calendar() {
         {getDaysInMonth(currentDate).map((date, index) => {
           const dayEvents = getEventsForDate(date);
           const hasHoliday = dayEvents.some((event: any) => event.type === 'national_holiday' || event.type === 'custom_holiday');
+          const hasAdminEvent = dayEvents.some((event: any) => event.type === 'academic_event' || event.type === 'special_event');
           return (
             <DayCell
               key={index}
               $isToday={isToday(date)}
               $isOtherMonth={!isCurrentMonth(date)}
               $hasHoliday={hasHoliday}
+              $hasAdminEvent={hasAdminEvent}
               onClick={() => handleDateClick(date)}
             >
               <DayNumber $isOtherMonth={!isCurrentMonth(date)}>
                 {date.getDate()}
               </DayNumber>
               {dayEvents.map((event: any) => (
-                <Event key={event._id} $type={event.type}>
+                <Event 
+                  key={event._id} 
+                  $type={event.type}
+                  onClick={(e) => handleEventClick(event, e)}
+                >
                   {event.title}
                 </Event>
               ))}
@@ -446,7 +536,9 @@ export default function Calendar() {
 
       <Modal $show={showModal}>
         <ModalContent>
-          <h3 style={{ color: 'white', marginTop: 0 }}>Add Event</h3>
+          <h3 style={{ color: 'white', marginTop: 0 }}>
+            {isEditing ? 'Edit Event' : 'Add Event'}
+          </h3>
           <form onSubmit={handleSubmit}>
             <FormGroup>
               <Label>Event Title</Label>
@@ -484,8 +576,25 @@ export default function Calendar() {
               <Button type="button" onClick={() => setShowModal(false)}>
                 Cancel
               </Button>
+              {isEditing && (
+                <Button 
+                  type="button" 
+                  onClick={() => {
+                    if (selectedEvent) {
+                      handleDeleteEvent(selectedEvent._id, { stopPropagation: () => {} } as React.MouseEvent);
+                      setShowModal(false);
+                      setIsEditing(false);
+                      setSelectedEvent(null);
+                      setFormData({ title: '', description: '', type: 'academic_event' });
+                    }
+                  }}
+                  style={{ background: '#EF4444' }}
+                >
+                  Delete
+                </Button>
+              )}
               <Button type="submit" $variant="primary">
-                Add Event
+                {isEditing ? 'Update Event' : 'Add Event'}
               </Button>
             </ButtonGroup>
           </form>

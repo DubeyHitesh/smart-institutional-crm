@@ -6,6 +6,7 @@ const fs = require('fs');
 const Message = require('../models/Message');
 const User = require('../models/User');
 const { tenantAuth } = require('../middleware/tenantAuth');
+const { logActivity } = require('../middleware/activityLogger');
 
 // Configure multer for audio uploads
 const storage = multer.diskStorage({
@@ -60,6 +61,10 @@ router.post('/send', tenantAuth, async (req, res) => {
     if (populatedMessage.replyTo) {
       response.replyTo = populatedMessage.replyTo;
     }
+
+    await logActivity(req, 'SEND_MESSAGE', 'MESSAGE', newMessage._id, 'Text Message', {
+      receiverId, messageLength: message.length, hasReply: !!replyTo
+    });
 
     res.status(201).json(response);
   } catch (error) {
@@ -168,6 +173,10 @@ router.post('/send-audio', tenantAuth, upload.single('audio'), async (req, res) 
     const populatedMessage = await req.tenantModels.Message.findById(newMessage._id)
       .populate('senderId', 'name username')
       .populate('receiverId', 'name username');
+
+    await logActivity(req, 'SEND_AUDIO_MESSAGE', 'MESSAGE', newMessage._id, 'Voice Message', {
+      receiverId, audioFile: audioFile.filename, fileSize: audioFile.size
+    });
 
     res.status(201).json({
       _id: populatedMessage._id,

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Calendar = require('../models/Calendar');
 const { tenantAuth } = require('../middleware/tenantAuth');
+const { logAdminActivity, logActivity } = require('../middleware/activityLogger');
 
 // Indian national holidays (predefined)
 const nationalHolidays = [
@@ -53,6 +54,7 @@ router.get('/', tenantAuth, async (req, res) => {
       .populate('createdBy', 'name username')
       .sort({ date: 1 });
     
+    await logActivity(req, 'VIEW_CALENDAR_EVENTS', 'CALENDAR', null, null, { count: events.length });
     res.json(events);
   } catch (error) {
     console.error('Get calendar events error:', error);
@@ -82,6 +84,14 @@ router.post('/', tenantAuth, async (req, res) => {
     const populatedEvent = await req.tenantModels.Calendar.findById(event._id)
       .populate('createdBy', 'name username');
     
+    await logAdminActivity(req.user._id, req.user.username, 'CREATE_CALENDAR_EVENT', 'CALENDAR', event._id, title, {
+      description, date, type
+    }, req);
+    
+    await logActivity(req, 'CREATE_CALENDAR_EVENT', 'CALENDAR', event._id, title, {
+      description, date, type
+    });
+    
     res.status(201).json(populatedEvent);
   } catch (error) {
     console.error('Create calendar event error:', error);
@@ -103,9 +113,19 @@ router.post('/init-holidays', tenantAuth, async (req, res) => {
       }));
 
       await req.tenantModels.Calendar.insertMany(holidays);
+      
+      await logAdminActivity(req.user._id, req.user.username, 'INIT_NATIONAL_HOLIDAYS', 'CALENDAR', null, 'National Holidays', {
+        count: holidays.length
+      }, req);
+      
+      await logActivity(req, 'INIT_NATIONAL_HOLIDAYS', 'CALENDAR', null, 'National Holidays', {
+        count: holidays.length
+      });
+      
+      res.json({ message: 'National holidays initialized', count: holidays.length });
+    } else {
+      res.json({ message: 'National holidays already exist', count: existingHolidays.length });
     }
-
-    res.json({ message: 'National holidays initialized' });
   } catch (error) {
     console.error('Initialize holidays error:', error);
     res.status(500).json({ message: error.message });
@@ -129,6 +149,40 @@ router.get('/upcoming', tenantAuth, async (req, res) => {
   }
 });
 
+// Update calendar event
+router.put('/:id', tenantAuth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Only admins can update events' });
+    }
+
+    const { title, description, type } = req.body;
+    
+    const updatedEvent = await req.tenantModels.Calendar.findByIdAndUpdate(
+      req.params.id,
+      { title, description, type },
+      { new: true }
+    ).populate('createdBy', 'name username');
+    
+    if (!updatedEvent) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+    
+    await logAdminActivity(req.user._id, req.user.username, 'UPDATE_CALENDAR_EVENT', 'CALENDAR', req.params.id, title, {
+      description, type
+    }, req);
+    
+    await logActivity(req, 'UPDATE_CALENDAR_EVENT', 'CALENDAR', req.params.id, title, {
+      description, type
+    });
+    
+    res.json(updatedEvent);
+  } catch (error) {
+    console.error('Update calendar event error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Delete calendar event
 router.delete('/:id', tenantAuth, async (req, res) => {
   try {
@@ -136,7 +190,23 @@ router.delete('/:id', tenantAuth, async (req, res) => {
       return res.status(403).json({ message: 'Only admins can delete events' });
     }
 
+    const event = await req.tenantModels.Calendar.findById(req.params.id);
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+    
     await req.tenantModels.Calendar.findByIdAndDelete(req.params.id);
+    
+    await logAdminActivity(req.user._id, req.user.username, 'DELETE_CALENDAR_EVENT', 'CALENDAR', req.params.id, event.title, {
+      type: event.type,
+      date: event.date
+    }, req);
+    
+    await logActivity(req, 'DELETE_CALENDAR_EVENT', 'CALENDAR', req.params.id, event.title, {
+      type: event.type,
+      date: event.date
+    });
+    
     res.json({ message: 'Event deleted successfully' });
   } catch (error) {
     console.error('Delete calendar event error:', error);

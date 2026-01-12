@@ -1,0 +1,76 @@
+[{
+  "_id": {
+    "$oid": "69539c18885d0a21dd14bed6"
+  },
+  "username": "Pratik sir",
+  "password": "$2a$10$MuhkaWpQN2DzenbACSqjRuMRgLF3eTyy.pSjNYm5UuwHHThGsPsv2",
+  "role": "teacher",
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-12-30T09:32:08.899Z"
+  },
+  "updatedAt": {
+    "$date": "2026-01-11T21:45:56.086Z"
+  },
+  "__v": 0,
+  "lastLogin": {
+    "$date": "2026-01-11T21:45:56.085Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69539c80885d0a21dd14bedc"
+  },
+  "username": "Shubham Sir",
+  "password": "$2a$10$PCFPchmJztZMU9aqZ5k3hea5Li4ss8tDlS5Ji2X1A7RcsjMAwqlgO",
+  "role": "teacher",
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-12-30T09:33:52.035Z"
+  },
+  "updatedAt": {
+    "$date": "2026-01-11T12:49:11.044Z"
+  },
+  "__v": 0,
+  "lastLogin": {
+    "$date": "2026-01-11T12:49:11.043Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69539ca0885d0a21dd14bee0"
+  },
+  "username": "Raju",
+  "password": "$2a$10$xr2IEmiyH8U13dUPI5PaCePABmTnHJv8dMQxLKbzLZo4KY53cC82C",
+  "role": "student",
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-12-30T09:34:24.271Z"
+  },
+  "updatedAt": {
+    "$date": "2026-01-11T21:29:11.329Z"
+  },
+  "__v": 0,
+  "lastLogin": {
+    "$date": "2026-01-11T21:29:11.329Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "695638e8dd2458d9c638cf64"
+  },
+  "username": "Shubham",
+  "password": "$2a$10$4yMkCr3iTzl2vIXsnhy9wOSGipclGnumLQmsxSedV9xXRZCRvDVAG",
+  "role": "student",
+  "isActive": true,
+  "createdAt": {
+    "$date": "2026-01-01T09:05:44.947Z"
+  },
+  "updatedAt": {
+    "$date": "2026-01-11T12:48:38.927Z"
+  },
+  "__v": 0,
+  "lastLogin": {
+    "$date": "2026-01-11T12:48:38.926Z"
+  }
+}]

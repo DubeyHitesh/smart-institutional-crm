@@ -1,5 +1,24 @@
 const DatabaseManager = require('../utils/DatabaseManager');
 
+const logActivity = async (req, action, targetType, targetId = null, targetName = null, details = {}) => {
+  try {
+    if (req.tenantModels && req.tenantModels.ActivityLog) {
+      await req.tenantModels.ActivityLog.create({
+        userId: req.user._id,
+        action,
+        targetType,
+        targetId,
+        targetName,
+        details,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+    }
+  } catch (error) {
+    console.log('Activity logging failed (non-critical):', error.message);
+  }
+};
+
 const logAdminActivity = async (adminId, adminUsername, action, targetType, targetId = null, targetName = null, details = {}, req = null) => {
   try {
     const masterConnection = DatabaseManager.getMasterConnection();
@@ -45,4 +64,4 @@ const activityLogger = (action) => {
   };
 };
 
-module.exports = { logAdminActivity, activityLogger };
+module.exports = { logAdminActivity, activityLogger, logActivity };

@@ -1,0 +1,42 @@
+[{
+  "_id": {
+    "$oid": "69538f9b73f6be27fd1bbc42"
+  },
+  "username": "Viva_admin",
+  "password": "$2a$10$R/rSkzk6dhAIPosZbJMgxeFlWqOx6PoTbrY2EUawi3sA3LhuDUC1m",
+  "name": "Viva College",
+  "institutionName": "VIVA Institute Of Technology",
+  "databaseName": "smart_crm_Viva_admin_1767083931641",
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-12-30T08:38:51.661Z"
+  },
+  "updatedAt": {
+    "$date": "2026-01-11T21:45:52.374Z"
+  },
+  "__v": 0,
+  "lastLogin": {
+    "$date": "2026-01-11T21:45:52.373Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "696240984420abe52e867d93"
+  },
+  "username": "Vartak_Admin",
+  "password": "$2a$10$1MXpgOKS5tM3D9DBGHYExODMBU3IgBVT0BE9RrJT1wgnJ.HS82cTy",
+  "name": "Vartak",
+  "institutionName": "Vartak college of Engineering",
+  "databaseName": "smart_crm_Vartak_Admin_1768046744377",
+  "isActive": true,
+  "createdAt": {
+    "$date": "2026-01-10T12:05:44.379Z"
+  },
+  "updatedAt": {
+    "$date": "2026-01-10T12:06:24.693Z"
+  },
+  "__v": 0,
+  "lastLogin": {
+    "$date": "2026-01-10T12:06:24.691Z"
+  }
+}]
