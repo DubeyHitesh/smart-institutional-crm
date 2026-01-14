@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import { AppProvider, useApp } from './context/AppContext';
 import LandingPage from './pages/NewLandingPage';
 import RoleSelection from './pages/RoleSelection';
@@ -83,6 +84,7 @@ function App() {
       <Router>
         <div className="App">
           <AppRoutes />
+          <Analytics />
         </div>
       </Router>
     </AppProvider>
