@@ -13,7 +13,8 @@ router.get('/', tenantAuth, adminAuth, async (req, res) => {
     await logAdminActivity(req.user._id, req.user.username, 'VIEW_USERS', 'USER', null, null, { count: users.length }, req);
     res.json(users);
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error fetching users:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
