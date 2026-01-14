@@ -9,7 +9,8 @@ class DatabaseManager {
   // Get master database connection
   getMasterConnection() {
     if (!this.masterConnection) {
-      this.masterConnection = mongoose.createConnection(process.env.MASTER_DB_URI || 'mongodb://localhost:27017/smart_crm_master');
+      const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/smart_crm_master';
+      this.masterConnection = mongoose.createConnection(mongoUri);
       this.masterConnection.on('connected', () => {
         console.log('✅ Connected to Master Database: smart_crm_master');
       });
@@ -23,7 +24,9 @@ class DatabaseManager {
   // Get tenant database connection
   getTenantConnection(databaseName) {
     if (!this.connections.has(databaseName)) {
-      const connection = mongoose.createConnection(`mongodb://localhost:27017/${databaseName}`);
+      const baseUri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
+      const tenantUri = baseUri.replace(/\/[^/]*\?/, `/${databaseName}?`);
+      const connection = mongoose.createConnection(tenantUri);
       this.connections.set(databaseName, connection);
     }
     return this.connections.get(databaseName);
