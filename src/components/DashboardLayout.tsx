@@ -30,17 +30,16 @@ const Container = styled.div`
   background: transparent;
 `;
 
-const MainContent = styled.div<{ $sidebarOpen: boolean }>`
+const MainContent = styled.div`
   flex: 1;
-  margin-bottom: ${props => props.$sidebarOpen ? '300px' : '80px'};
-  transition: margin-bottom 0.3s ease;
+  margin-bottom: 100px;
 `;
 
 const Header = styled.div`
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 20px 30px;
+  padding: 20px 30px 20px 90px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   display: flex;
   justify-content: space-between;
@@ -54,6 +53,10 @@ const HeaderTitle = styled.h1`
   background: linear-gradient(45deg, #FFFFFF, #EC4899);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100vw - 250px);
 `;
 
 const LogoutButton = styled.button`
@@ -133,8 +136,13 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ userRole }: DashboardLayoutProps) {
   const { state, dispatch } = useApp();
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState('profile');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeSection, setActiveSection] = useState(() => {
+    return sessionStorage.getItem('activeSection') || 'profile';
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem('activeSection', activeSection);
+  }, [activeSection]);
 
   // Load data on component mount
   useEffect(() => {
@@ -331,7 +339,7 @@ export default function DashboardLayout({ userRole }: DashboardLayoutProps) {
         onSectionChange={setActiveSection}
       />
       
-      <MainContent $sidebarOpen={sidebarOpen}>
+      <MainContent>
         <Header>
           <HeaderTitle>{getSectionTitle()}</HeaderTitle>
           <LogoutButton onClick={handleLogout}>

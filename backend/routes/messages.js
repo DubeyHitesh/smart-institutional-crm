@@ -194,4 +194,57 @@ router.post('/send-audio', tenantAuth, upload.single('audio'), async (req, res) 
   }
 });
 
+// Delete entire conversation
+router.delete('/conversation/:userId', tenantAuth, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const currentUserId = req.user._id;
+
+    const result = await req.tenantModels.Message.deleteMany({
+      $or: [
+        { senderId: currentUserId, receiverId: userId },
+        { senderId: userId, receiverId: currentUserId }
+      ]
+    });
+
+    await logActivity(req, 'DELETE_CONVERSATION', 'MESSAGE', userId, 'Conversation Deleted', {
+      deletedCount: result.deletedCount
+    });
+
+    res.json({ message: 'Conversation deleted successfully', deletedCount: result.deletedCount });
+  } catch (error) {
+    console.error('Delete conversation error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Delete selected messages
+router.delete('/selected', tenantAuth, async (req, res) => {
+  try {
+    const { messageIds } = req.body;
+    const currentUserId = req.user._id;
+
+    if (!messageIds || !Array.isArray(messageIds)) {
+      return res.status(400).json({ message: 'Message IDs array is required' });
+    }
+
+    const result = await req.tenantModels.Message.deleteMany({
+      _id: { $in: messageIds },
+      $or: [
+        { senderId: currentUserId },
+        { receiverId: currentUserId }
+      ]
+    });
+
+    await logActivity(req, 'DELETE_SELECTED_MESSAGES', 'MESSAGE', null, 'Selected Messages Deleted', {
+      messageIds, deletedCount: result.deletedCount
+    });
+
+    res.json({ message: 'Selected messages deleted successfully', deletedCount: result.deletedCount });
+  } catch (error) {
+    console.error('Delete selected messages error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;

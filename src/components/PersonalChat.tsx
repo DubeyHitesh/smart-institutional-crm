@@ -75,6 +75,9 @@ const ChatHeader = styled.div`
   background: #202C33;
   position: relative;
   z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `;
 
 const MessagesContainer = styled.div`
@@ -321,6 +324,68 @@ const EmojiButton = styled.button`
   }
 `;
 
+const DeleteButton = styled.button`
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+  }
+`;
+
+const SelectModeButton = styled.button`
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+  }
+`;
+
+const MessageCheckbox = styled.input`
+  margin-right: 8px;
+  cursor: pointer;
+`;
+
+const SelectionActions = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(108, 117, 125, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 1;
+`;
+
+const SelectionCount = styled.span`
+  color: #E9EDEF;
+  font-size: 12px;
+  font-weight: 600;
+`;
+
 const EmptyState = styled.div`
   flex: 1;
   display: flex;
@@ -355,6 +420,8 @@ export default function PersonalChat() {
   const [unreadCounts, setUnreadCounts] = useState<{[key: string]: number}>({});
   const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedMessages, setSelectedMessages] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const currentUser = state.currentUser;
@@ -487,6 +554,56 @@ export default function PersonalChat() {
     '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓', '🆔', '⚛️', '🉑', '☢️', '☣️', '📴', '📳'
   ];
 
+  const deleteConversation = async () => {
+    if (!selectedUser) return;
+    
+    if (window.confirm(`Are you sure you want to delete all messages with ${selectedUser.name || selectedUser.username}? This action cannot be undone.`)) {
+      try {
+        await apiService.deleteConversation(selectedUser._id);
+        setMessages([]);
+        alert('Conversation deleted successfully!');
+      } catch (error) {
+        console.error('Error deleting conversation:', error);
+        alert('Failed to delete conversation. Please try again.');
+      }
+    }
+  };
+
+  const deleteSelectedMessages = async () => {
+    if (selectedMessages.size === 0) return;
+    
+    if (window.confirm(`Are you sure you want to delete ${selectedMessages.size} selected message(s)? This action cannot be undone.`)) {
+      try {
+        const messageIds = Array.from(selectedMessages);
+        await apiService.deleteSelectedMessages(messageIds);
+        setMessages(prev => prev.filter(msg => !selectedMessages.has(msg._id)));
+        setSelectedMessages(new Set());
+        setSelectMode(false);
+        alert('Selected messages deleted successfully!');
+      } catch (error) {
+        console.error('Error deleting selected messages:', error);
+        alert('Failed to delete selected messages. Please try again.');
+      }
+    }
+  };
+
+  const toggleSelectMode = () => {
+    setSelectMode(!selectMode);
+    setSelectedMessages(new Set());
+  };
+
+  const toggleMessageSelection = (messageId: string) => {
+    setSelectedMessages(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(messageId)) {
+        newSet.delete(messageId);
+      } else {
+        newSet.add(messageId);
+      }
+      return newSet;
+    });
+  };
+
   const addEmoji = (emoji: string) => {
     setNewMessage(prev => prev + emoji);
     setShowEmojiPicker(false);
@@ -543,8 +660,34 @@ export default function PersonalChat() {
         {selectedUser ? (
           <>
             <ChatHeader>
-              Chat with {selectedUser.name || selectedUser.username}
+              <span>Chat with {selectedUser.name || selectedUser.username}</span>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <SelectModeButton onClick={toggleSelectMode}>
+                  <span>{selectMode ? '✓' : '☑️'}</span>
+                  {selectMode ? 'Cancel' : 'Select'}
+                </SelectModeButton>
+                <DeleteButton onClick={deleteConversation}>
+                  <span>🗑️</span>
+                  Delete All
+                </DeleteButton>
+              </div>
             </ChatHeader>
+            
+            {selectMode && (
+              <SelectionActions>
+                <SelectionCount>
+                  {selectedMessages.size} message(s) selected
+                </SelectionCount>
+                <DeleteButton 
+                  onClick={deleteSelectedMessages}
+                  disabled={selectedMessages.size === 0}
+                  style={{ opacity: selectedMessages.size === 0 ? 0.5 : 1 }}
+                >
+                  <span>🗑️</span>
+                  Delete Selected
+                </DeleteButton>
+              </SelectionActions>
+            )}
             
             <MessagesContainer>
               {messages.map(message => {
@@ -558,7 +701,18 @@ export default function PersonalChat() {
                 console.log('Reply data:', message.replyTo); // Debug reply data
                 return (
                   <Message key={message._id} $isOwn={isOwn}>
-                    <MessageBubble $isOwn={isOwn} onClick={() => setReplyingTo(message)}>
+                    {selectMode && (
+                      <MessageCheckbox
+                        type="checkbox"
+                        checked={selectedMessages.has(message._id)}
+                        onChange={() => toggleMessageSelection(message._id)}
+                      />
+                    )}
+                    <MessageBubble 
+                      $isOwn={isOwn} 
+                      onClick={() => selectMode ? toggleMessageSelection(message._id) : setReplyingTo(message)}
+                      style={{ cursor: selectMode ? 'pointer' : 'pointer' }}
+                    >
                       <MessageContent>
                         <SenderName $isOwn={isOwn}>
                           {isOwn ? 'You' : message.senderName}

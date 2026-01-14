@@ -52,6 +52,21 @@ const SettingDescription = styled.div`
   margin-top: 4px;
 `;
 
+const Select = styled.select`
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  
+  option {
+    background: #1a1a1a;
+    color: white;
+  }
+`;
+
 const Toggle = styled.button<{ active: boolean }>`
   position: relative;
   width: 60px;
@@ -150,6 +165,9 @@ export default function Settings() {
   const navigate = useNavigate();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [navPosition, setNavPosition] = useState(() => {
+    return localStorage.getItem(`navPosition_${state.currentUser?.id || state.currentUser?._id}`) || 'bottom';
+  });
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -170,6 +188,13 @@ export default function Settings() {
       document.body.classList.remove('dark-theme');
       localStorage.setItem('theme', 'light');
     }
+  };
+
+  const handleNavPositionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const position = e.target.value;
+    setNavPosition(position);
+    localStorage.setItem(`navPosition_${state.currentUser?.id || state.currentUser?._id}`, position);
+    window.location.reload();
   };
 
   const handleDeleteAccount = async () => {
@@ -195,6 +220,18 @@ export default function Settings() {
             <SettingDescription>Switch between light and dark theme</SettingDescription>
           </div>
           <Toggle active={isDarkMode} onClick={toggleTheme} />
+        </SettingItem>
+        <SettingItem>
+          <div>
+            <SettingLabel>Navigation Position</SettingLabel>
+            <SettingDescription>Choose where to display the navigation bar</SettingDescription>
+          </div>
+          <Select value={navPosition} onChange={handleNavPositionChange}>
+            <option value="bottom">Bottom</option>
+            <option value="top">Top</option>
+            <option value="left">Left</option>
+            <option value="right">Right</option>
+          </Select>
         </SettingItem>
       </Section>
 

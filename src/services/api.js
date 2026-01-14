@@ -240,6 +240,19 @@ class ApiService {
     return this.request('/messages/unread/counts');
   }
 
+  async deleteConversation(userId) {
+    return this.request(`/messages/conversation/${userId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async deleteSelectedMessages(messageIds) {
+    return this.request('/messages/selected', {
+      method: 'DELETE',
+      body: { messageIds },
+    });
+  }
+
   logout() {
     this.removeToken();
   }

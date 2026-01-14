@@ -1,0 +1,11 @@
+customModes:
+  - slug: coding-mode
+    name: Coding mode
+    roleDefinition: Build a Feature based on the prompt given to you
+    groups:
+      - read
+      - edit
+      - browser
+      - command
+      - mcp
+    source: project

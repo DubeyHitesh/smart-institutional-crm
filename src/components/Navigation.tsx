@@ -3,167 +3,141 @@ import styled from 'styled-components';
 import { User } from '../types';
 import { useApp } from '../context/AppContext';
 
-const SidebarContainer = styled.div<{ $isOpen: boolean }>`
+const ProfileIconContainer = styled.div`
   position: fixed;
-  left: 0;
-  bottom: 0;
-  height: ${props => props.$isOpen ? '300px' : '80px'};
-  width: 100vw;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.15s ease;
-  z-index: 1000;
-  overflow: hidden;
+  top: 20px;
+  left: 20px;
+  z-index: 1001;
 `;
 
-const ToggleButton = styled.button`
-  position: absolute;
-  top: 20px;
-  right: 15px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+const ProfileIcon = styled.button`
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(236, 72, 153, 0.8));
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   color: white;
-  font-size: 18px;
+  font-size: 20px;
+  font-weight: 700;
   cursor: pointer;
-  padding: 8px;
-  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+  
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+  }
+`;
+
+const ProfileDropdown = styled.div<{ $isOpen: boolean }>`
+  position: absolute;
+  top: 60px;
+  left: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 15px;
+  min-width: 200px;
+  opacity: ${props => props.$isOpen ? 1 : 0};
+  visibility: ${props => props.$isOpen ? 'visible' : 'hidden'};
+  transform: ${props => props.$isOpen ? 'translateY(0)' : 'translateY(-10px)'};
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+`;
+
+const ProfileInfo = styled.div`
+  color: white;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+`;
+
+const ProfileName = styled.div`
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 5px;
+`;
+
+const ProfileRole = styled.div`
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+`;
+
+const ProfileButton = styled.button`
+  width: 100%;
+  background: rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
   transition: all 0.3s ease;
   
   &:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.1);
-  }
-  
-  @media (max-width: 768px) {
-    top: 15px;
-    right: 15px;
-    z-index: 1001;
+    background: rgba(139, 92, 246, 0.4);
   }
 `;
 
-const UserSection = styled.div<{ $isOpen: boolean }>`
-  position: absolute;
-  left: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: white;
-  font-weight: 600;
-  font-size: 14px;
-  opacity: ${props => props.$isOpen ? 1 : 0.8};
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+const NavContainer = styled.div`
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
 `;
 
-const Avatar = styled.div<{ $isOpen: boolean }>`
-  width: ${props => props.$isOpen ? '60px' : '40px'};
-  height: ${props => props.$isOpen ? '60px' : '40px'};
-  border-radius: 50%;
-  background: rgba(255,255,255,0.2);
+const NavBar = styled.div`
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 25px;
+  padding: 12px 20px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 10px;
-  font-size: ${props => props.$isOpen ? '24px' : '18px'};
+  gap: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+`;
+
+const NavItem = styled.button<{ $active?: boolean }>`
+  background: ${props => props.$active ? 'rgba(139, 92, 246, 0.4)' : 'transparent'};
+  border: ${props => props.$active ? '1px solid rgba(139, 92, 246, 0.6)' : '1px solid transparent'};
   color: white;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-`;
-
-const UserName = styled.div<{ $isOpen: boolean }>`
-  color: white;
-  font-weight: 600;
-  margin-bottom: 5px;
-  opacity: ${props => props.$isOpen ? 1 : 0};
-  transform: ${props => props.$isOpen ? 'translateY(0)' : 'translateY(-10px)'};
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  font-size: ${props => props.$isOpen ? '16px' : '12px'};
-  
-  @media (max-width: 768px) {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
-
-const UserRole = styled.div<{ $isOpen: boolean }>`
-  color: rgba(255,255,255,0.8);
-  font-size: ${props => props.$isOpen ? '12px' : '10px'};
-  text-transform: uppercase;
-  opacity: ${props => props.$isOpen ? 1 : 0};
-  transform: ${props => props.$isOpen ? 'translateY(0)' : 'translateY(-10px)'};
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  @media (max-width: 768px) {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
-
-const MenuList = styled.ul`
-  list-style: none;
-  padding: 10px;
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 5px;
-`;
-
-const MenuItem = styled.li<{ $active?: boolean }>`
-  margin: 5px 0;
-`;
-
-const MenuLink = styled.button<{ $active?: boolean; $isOpen: boolean }>`
-  width: ${props => props.$isOpen ? '120px' : '80px'};
-  height: ${props => props.$isOpen ? '60px' : '50px'};
-  background: ${props => props.$active ? 'rgba(139, 92, 246, 0.3)' : 'transparent'};
-  border: ${props => props.$active ? '1px solid rgba(139, 92, 246, 0.5)' : 'none'};
-  color: white;
-  padding: ${props => props.$isOpen ? '8px' : '12px'};
+  padding: 10px 16px;
+  border-radius: 18px;
   cursor: pointer;
   display: flex;
-  flex-direction: ${props => props.$isOpen ? 'column' : 'column'};
   align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
+  gap: 8px;
+  transition: all 0.3s ease;
   position: relative;
-  border-radius: 8px;
+  font-size: 14px;
+  white-space: nowrap;
   
   &:hover {
-    background: rgba(236, 72, 153, 0.2);
+    background: rgba(236, 72, 153, 0.3);
     transform: translateY(-2px);
   }
 `;
 
-const MenuIcon = styled.span<{ $isOpen: boolean }>`
-  font-size: ${props => props.$isOpen ? '32px' : '22px'};
-  margin-right: 0;
-  width: ${props => props.$isOpen ? '40px' : '28px'};
-  height: ${props => props.$isOpen ? '40px' : '28px'};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-`;
-
-const MenuText = styled.span<{ $isOpen: boolean }>`
-  display: ${props => props.$isOpen ? 'block' : 'none'};
-  font-size: 12px;
-  margin-top: 4px;
-  color: white;
-  text-align: center;
-  white-space: nowrap;
+const NavIcon = styled.span`
+  font-size: 20px;
 `;
 
 const NotificationDot = styled.span`
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 6px;
+  right: 6px;
   width: 8px;
   height: 8px;
   background: #e74c3c;
   border-radius: 50%;
-  border: 2px solid white;
+  border: 2px solid rgba(0, 0, 0, 0.7);
 `;
 
 interface NavigationProps {
@@ -173,11 +147,10 @@ interface NavigationProps {
 }
 
 export default function Navigation({ user, activeSection, onSectionChange }: NavigationProps) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
   const { state, dispatch } = useApp();
   
-  // Check for unread messages
   useEffect(() => {
     const checkUnreadMessages = async () => {
       if (user.role === 'teacher' || user.role === 'student') {
@@ -199,7 +172,6 @@ export default function Navigation({ user, activeSection, onSectionChange }: Nav
     };
     
     checkUnreadMessages();
-    // Check every 30 seconds for new messages
     const interval = setInterval(checkUnreadMessages, 30000);
     return () => clearInterval(interval);
   }, [user]);
@@ -220,18 +192,13 @@ export default function Navigation({ user, activeSection, onSectionChange }: Nav
   };
 
   const getMenuItems = () => {
-    const commonItems = [
-      { id: 'profile', icon: '👤', label: 'Profile' },
-    ];
-
     if (user.role === 'admin') {
       return [
-        ...commonItems,
-        { id: 'users', icon: '👥', label: 'User Management' },
-        { id: 'classes', icon: '🏫', label: 'Class Management' },
-        { id: 'subjects', icon: '📚', label: 'Subject Management' },
-        { id: 'student-allotment', icon: '📝', label: 'Student Allotment' },
-        { id: 'schedule', icon: '📅', label: 'Schedule Management' },
+        { id: 'users', icon: '👥', label: 'Users' },
+        { id: 'classes', icon: '🏫', label: 'Classes' },
+        { id: 'subjects', icon: '📚', label: 'Subjects' },
+        { id: 'student-allotment', icon: '📝', label: 'Allotment' },
+        { id: 'schedule', icon: '📅', label: 'Schedule' },
         { id: 'auto-timetable', icon: '🤖', label: 'Auto Timetable' },
         { id: 'calendar', icon: '📆', label: 'Calendar' },
         { id: 'reports', icon: '📊', label: 'Reports' },
@@ -241,12 +208,11 @@ export default function Navigation({ user, activeSection, onSectionChange }: Nav
 
     if (user.role === 'teacher') {
       return [
-        ...commonItems,
-        { id: 'classes', icon: '🏫', label: 'My Classes' },
+        { id: 'classes', icon: '🏫', label: 'Classes' },
         { id: 'students', icon: '👥', label: 'Students' },
         { id: 'assignments', icon: '📝', label: 'Assignments' },
         { id: 'performance', icon: '📈', label: 'Performance' },
-        { id: 'schedule', icon: '📅', label: 'My Schedule' },
+        { id: 'schedule', icon: '📅', label: 'Schedule' },
         { id: 'calendar', icon: '📆', label: 'Calendar' },
         { id: 'chat', icon: '💬', label: 'Chat', hasNotification: hasUnreadMessages },
         { id: 'inbox', icon: '📧', label: 'Inbox', hasNotification: hasUnreadNotifications },
@@ -254,9 +220,8 @@ export default function Navigation({ user, activeSection, onSectionChange }: Nav
     }
 
     return [
-      ...commonItems,
       { id: 'dashboard', icon: '📊', label: 'Dashboard' },
-      { id: 'assignments', icon: '📝', label: 'My Assignments' },
+      { id: 'assignments', icon: '📝', label: 'Assignments' },
       { id: 'grades', icon: '🎯', label: 'Grades' },
       { id: 'schedule', icon: '📅', label: 'Schedule' },
       { id: 'calendar', icon: '📆', label: 'Calendar' },
@@ -265,31 +230,46 @@ export default function Navigation({ user, activeSection, onSectionChange }: Nav
     ];
   };
 
-  return (
-    <SidebarContainer $isOpen={isOpen}>
-      <ToggleButton onClick={() => setIsOpen(!isOpen)}>
-        {isOpen ? '↓' : '↑'}
-      </ToggleButton>
-      
-      <UserSection $isOpen={isOpen}>
-        {user.name || user.username}
-      </UserSection>
+  const getInitial = () => {
+    const name = user.name || user.username || '';
+    return name.charAt(0).toUpperCase();
+  };
 
-      <MenuList>
-        {getMenuItems().map(item => (
-          <MenuItem key={item.id}>
-            <MenuLink
+  return (
+    <>
+      <ProfileIconContainer>
+        <ProfileIcon onClick={() => setShowProfileDropdown(!showProfileDropdown)}>
+          {getInitial()}
+        </ProfileIcon>
+        <ProfileDropdown $isOpen={showProfileDropdown}>
+          <ProfileInfo>
+            <ProfileName>{user.name || user.username}</ProfileName>
+            <ProfileRole>{user.role}</ProfileRole>
+          </ProfileInfo>
+          <ProfileButton onClick={() => {
+            setShowProfileDropdown(false);
+            handleSectionChange('profile');
+          }}>
+            View Profile
+          </ProfileButton>
+        </ProfileDropdown>
+      </ProfileIconContainer>
+
+      <NavContainer>
+        <NavBar>
+          {getMenuItems().map(item => (
+            <NavItem
+              key={item.id}
               $active={activeSection === item.id}
-              $isOpen={isOpen}
               onClick={() => handleSectionChange(item.id)}
             >
-              <MenuIcon $isOpen={isOpen}>{item.icon}</MenuIcon>
-              <MenuText $isOpen={isOpen}>{item.label}</MenuText>
+              <NavIcon>{item.icon}</NavIcon>
+              {item.label}
               {(item as any).hasNotification && <NotificationDot />}
-            </MenuLink>
-          </MenuItem>
-        ))}
-      </MenuList>
-    </SidebarContainer>
+            </NavItem>
+          ))}
+        </NavBar>
+      </NavContainer>
+    </>
   );
 }
