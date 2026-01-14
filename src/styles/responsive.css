@@ -1,0 +1,32 @@
+/* Global Responsive Styles */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  input, select, textarea, button {
+    font-size: 16px !important;
+  }
+  
+  h1 { font-size: 24px !important; }
+  h2 { font-size: 20px !important; }
+  h3 { font-size: 18px !important; }
+  
+  button {
+    min-height: 44px;
+  }
+}

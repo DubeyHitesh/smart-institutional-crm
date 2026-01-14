@@ -33,6 +33,11 @@ const Container = styled.div`
 const MainContent = styled.div`
   flex: 1;
   margin-bottom: 100px;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 20px;
+    margin-right: 80px;
+  }
 `;
 
 const Header = styled.div`
@@ -44,6 +49,13 @@ const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  
+  @media (max-width: 768px) {
+    padding: 15px 20px;
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
 `;
 
 const HeaderTitle = styled.h1`
@@ -57,6 +69,12 @@ const HeaderTitle = styled.h1`
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: calc(100vw - 250px);
+  
+  @media (max-width: 768px) {
+    font-size: 20px;
+    max-width: 100%;
+    text-align: center;
+  }
 `;
 
 const LogoutButton = styled.button`
@@ -73,10 +91,18 @@ const LogoutButton = styled.button`
     transform: translateY(-2px);
     box-shadow: 0 10px 20px rgba(139, 92, 246, 0.4);
   }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const ContentArea = styled.div`
   padding: 30px;
+  
+  @media (max-width: 768px) {
+    padding: 15px;
+  }
 `;
 
 const Section = styled.div`
@@ -87,12 +113,20 @@ const Section = styled.div`
   box-shadow: 0 8px 32px rgba(0,0,0,0.3);
   padding: 30px;
   margin-bottom: 20px;
+  
+  @media (max-width: 768px) {
+    padding: 20px 15px;
+  }
 `;
 
 const SectionTitle = styled.h2`
   margin: 0 0 20px 0;
   color: white;
   font-size: 20px;
+  
+  @media (max-width: 768px) {
+    font-size: 18px;
+  }
 `;
 
 const StatsGrid = styled.div`
@@ -100,6 +134,15 @@ const StatsGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
   margin-bottom: 30px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const StatCard = styled.div`
