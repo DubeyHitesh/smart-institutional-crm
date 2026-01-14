@@ -1,0 +1,5 @@
+# After you deploy backend, run this:
+# Replace YOUR_BACKEND_URL with actual URL from backend deployment
+
+# Example:
+# REACT_APP_API_URL=https://smart-crm-backend.vercel.app/api
